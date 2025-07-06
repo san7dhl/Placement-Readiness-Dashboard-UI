@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Placement Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style-profile.css">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div id="profileSection">
+            <header class="header">
+                <h1><i class="fas fa-user-chart"></i> Placement Readiness Profile</h1>
+                <p id="studentName"></p>
+            </header>
+            
+            <div id="attendanceWarning" class="attendance-warning"></div>
+
+            <div class="profile-grid">
+                <div class="profile-card">
+                    <h3>Overall Readiness</h3>
+                    <div id="readinessGauge"></div>
+                </div>
+                <div class="profile-card">
+                    <h3>Skill Radar</h3>
+                    <div id="skillRadar"></div>
+                </div>
+                <div class="profile-card large-card">
+                     <h3><i class="fas fa-tasks"></i> Detailed Skill Progress</h3>
+                    <div id="progressDetails"></div>
+                </div>
+                 <div class="profile-card">
+                    <h3><i class="fas fa-id-card"></i> My Assets</h3>
+                    <div id="profileDetails"></div>
+                </div>
+                 <div class="profile-card">
+                    <h3><i class="fas fa-lightbulb"></i> Actionable Suggestions</h3>
+                    <div id="personalSuggestions"></div>
+                </div>
+                <div classs="profile-card">
+                    <h3><i class="fas fa-check-double"></i> Strengths & Weaknesses</h3>
+                    <div id="badges"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+<script src="profile.js"></script>
+</body>
+</html>
