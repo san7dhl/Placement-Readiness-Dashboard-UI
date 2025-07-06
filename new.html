@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Placement Readiness Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary-color: #f1f5f9;
+            --accent-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --border-color: #e2e8f0;
+            --shadow-light: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius: 12px;
+            --radius-lg: 16px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--bg-primary);
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-medium);
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-large);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 1rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .main-content {
+            background: var(--bg-primary);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-medium);
+            overflow: hidden;
+        }
+
+        .content-header {
+            padding: 2rem;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .content-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .content-header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .search-filter {
+            padding: 1.5rem 2rem;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .search-container {
+            position: relative;
+            max-width: 400px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+            background: var(--bg-secondary);
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .student-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .student-table th {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        .student-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .student-row {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .student-row:hover {
+            background: var(--bg-secondary);
+        }
+
+        .rank-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: white;
+        }
+
+        .rank-1 { background: linear-gradient(135deg, #ffd700, #ffb700); }
+        .rank-2 { background: linear-gradient(135deg, #c0c0c0, #a0a0a0); }
+        .rank-3 { background: linear-gradient(135deg, #cd7f32, #b8860b); }
+        .rank-other { background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); }
+
+        .student-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .student-id {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .readiness-container {
+            min-width: 200px;
+        }
+
+        .readiness-bar {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            overflow: hidden;
+            height: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .readiness-progress {
+            height: 100%;
+            border-radius: 8px;
+            transition: width 0.3s ease;
+        }
+
+        .readiness-excellent { background: linear-gradient(90deg, var(--accent-color), #059669); }
+        .readiness-good { background: linear-gradient(90deg, var(--warning-color), #d97706); }
+        .readiness-poor { background: linear-gradient(90deg, var(--danger-color), #dc2626); }
+
+        .readiness-text {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .readiness-excellent-text { color: var(--accent-color); }
+        .readiness-good-text { color: var(--warning-color); }
+        .readiness-poor-text { color: var(--danger-color); }
+
+        .attendance-warning {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--danger-color);
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-top: 0.25rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 1rem;
+                margin-bottom: 2rem;
+            }
+
+            .stat-card {
+                padding: 1.5rem;
+            }
+
+            .stat-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+            }
+
+            .stat-number {
+                font-size: 1.5rem;
+            }
+
+            .content-header {
+                padding: 1.5rem;
+            }
+
+            .search-filter {
+                padding: 1rem 1.5rem;
+            }
+
+            /* Mobile Table Cards */
+            .student-table,
+            .student-table thead,
+            .student-table tbody,
+            .student-table th,
+            .student-table td,
+            .student-table tr {
+                display: block;
+            }
+
+            .student-table thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+
+            .student-table tr {
+                background: white;
+                border-radius: var(--radius);
+                margin-bottom: 1rem;
+                box-shadow: var(--shadow-light);
+                overflow: hidden;
+            }
+
+            .student-table td {
+                border: none;
+                position: relative;
+                padding: 1rem;
+                padding-left: 40%;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .student-table td:last-child {
+                border-bottom: none;
+            }
+
+            .student-table td:before {
+                content: attr(data-label);
+                position: absolute;
+                left: 1rem;
+                width: 35%;
+                padding-right: 10px;
+                white-space: nowrap;
+                font-weight: 600;
+                color: var(--text-secondary);
+                font-size: 0.8rem;
+            }
+
+            .rank-badge {
+                margin-left: 0;
+            }
+
+            .readiness-container {
+                min-width: auto;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-card,
+        .main-content {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+        .stat-card:nth-child(4) { animation-delay: 0.4s; }
+        .main-content { animation-delay: 0.5s; }
+
+        /* Loading Animation */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--border-color);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-graduation-cap"></i> Student Placement Dashboard</h1>
+            <h2>School of Computer Science and Engineering</h2>
+            <p>Track student readiness and placement eligibility</p>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-number" id="totalStudents">0</div>
+                <div class="stat-label">Total Students</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-number" id="avgReadiness">0%</div>
+                <div class="stat-label">Average Readiness</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-number" id="eligibleStudents">0</div>
+                <div class="stat-label">Placement Eligible</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-number" id="lowAttendance">0</div>
+                <div class="stat-label">Low Attendance</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="content-header">
+                <h2>Student Leaderboard</h2>
+                <p>Students ranked by placement readiness score</p>
+            </div>
+
+            <div class="search-filter">
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" placeholder="Search students by name or ID..." id="searchInput">
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="student-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Student</th>
+                            <th>Readiness Score</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTableBody">
+                        <tr>
+                            <td colspan="3" class="empty-state">
+                                <div class="loading-spinner"></div>
+                                <p>Loading student data...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let students = [];
+        let filteredStudents = [];
+    
+        function calculateReadiness(student) {
+            const weights = {
+                communication: 15,
+                problemSolving: 15,
+                technicalSkills: 15,
+                attendance: 15,
+                resume: 15,
+                portfolio: 15,
+                proactive: 10,
+            };
+    
+            const communication = ((student.spoken_english_rating + student.written_communication_rating) / 2) * 20;
+            const problemSolving = student.problem_solving_rating * 20;
+            const technicalSkills = student.familiar_tools ? 70 : 40;
+            const attendance = parseFloat(student.attendance_percentage) * 100;
+            const resumeReadiness = student.has_resume.toLowerCase() === "yes" ? 100 : 0;
+            const portfolioReadiness = student.has_online_portfolio.toLowerCase() === "yes" ? 100 : 0;
+    
+            let proactive = 0;
+            if (student.has_project.toLowerCase() === "yes") proactive += 50;
+            if (student.has_certification.toLowerCase() === "yes") proactive += 50;
+    
+            const readiness = (
+                communication * weights.communication +
+                problemSolving * weights.problemSolving +
+                technicalSkills * weights.technicalSkills +
+                attendance * weights.attendance +
+                resumeReadiness * weights.resume +
+                portfolioReadiness * weights.portfolio +
+                proactive * weights.proactive
+            ) / 100;
+    
+            return Math.round(readiness);
+        }
+    
+        function getReadinessClass(score) {
+            if (score >= 75) return 'excellent';
+            if (score >= 50) return 'good';
+            return 'poor';
+        }
+    
+        function getRankClass(rank) {
+            if (rank === 1) return 'rank-1';
+            if (rank === 2) return 'rank-2';
+            if (rank === 3) return 'rank-3';
+            return 'rank-other';
+        }
+    
+        function populateTable() {
+            const tbody = document.getElementById('studentTableBody');
+            tbody.innerHTML = '';
+    
+            if (filteredStudents.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="3" class="empty-state">
+                            <i class="fas fa-search"></i>
+                            <p>No students found matching your search</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+    
+            filteredStudents.forEach((student, index) => {
+                const rank = index + 1;
+                const attendance = parseFloat(student.attendance_percentage);
+                const readinessClass = getReadinessClass(student.readiness);
+                const rankClass = getRankClass(rank);
+    
+                const row = document.createElement('tr');
+                row.className = 'student-row';
+                row.onclick = () => openProfile(student.registration_number);
+    
+                row.innerHTML = `
+                    <td data-label="Rank">
+                        <div class="rank-badge ${rankClass}">${rank}</div>
+                    </td>
+                    <td data-label="Student">
+                        <div class="student-name">${student.name}</div>
+                        <div class="student-id">#${student.registration_number}</div>
+                    </td>
+                    <td data-label="Readiness">
+                        <div class="readiness-container">
+                            <div class="readiness-bar">
+                                <div class="readiness-progress readiness-${readinessClass}" style="width: ${student.readiness}%"></div>
+                            </div>
+                            <div class="readiness-text readiness-${readinessClass}-text">${student.readiness}%</div>
+                            ${attendance < 0.7 ? '<div class="attendance-warning"><i class="fas fa-exclamation-triangle"></i> Ineligible for Placement</div>' : ''}
+                        </div>
+                    </td>
+                `;
+    
+                tbody.appendChild(row);
+            });
+        }
+    
+        function updateStats() {
+            const totalStudents = students.length;
+            const avgReadiness = Math.round(students.reduce((sum, s) => sum + s.readiness, 0) / totalStudents);
+            const eligibleStudents = students.filter(s => s.attendance_percentage >= 0.7).length;
+            const lowAttendance = students.filter(s => s.attendance_percentage < 0.7).length;
+    
+            document.getElementById('totalStudents').textContent = totalStudents;
+            document.getElementById('avgReadiness').textContent = avgReadiness + '%';
+            document.getElementById('eligibleStudents').textContent = eligibleStudents;
+            document.getElementById('lowAttendance').textContent = lowAttendance;
+        }
+    
+        function filterStudents(searchTerm) {
+            if (!searchTerm) {
+                filteredStudents = students;
+            } else {
+                filteredStudents = students.filter(student =>
+                    student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    student.registration_number.toString().includes(searchTerm)
+                );
+            }
+            populateTable();
+        }
+    
+        function openProfile(studentId) {
+            window.location.href = `profile.html?studentId=${studentId}`;
+        }
+    
+        function initializeApp() {
+            fetch('students.json')
+                .then(response => response.json())
+                .then(data => {
+                    students = data;
+    
+                    students.forEach(student => {
+                        student.readiness = calculateReadiness(student);
+                    });
+    
+                    students.sort((a, b) => b.readiness - a.readiness);
+                    filteredStudents = students;
+    
+                    updateStats();
+                    populateTable();
+    
+                    const searchInput = document.getElementById('searchInput');
+                    searchInput.addEventListener('input', (e) => {
+                        filterStudents(e.target.value);
+                    });
+                })
+                .catch(error => {
+                    console.error("Error loading student data:", error);
+                });
+        }
+    
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+</body>
+</html>

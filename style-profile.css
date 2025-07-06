@@ -1,0 +1,176 @@
+/* Import variables and base styles from leaderboard */
+:root {
+    --primary-color: #6366f1;
+    --primary-dark: #4f46e5;
+    --secondary-color: #f1f5f9;
+    --accent-color: #10b981;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --border-color: #e2e8f0;
+    --shadow-light: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --radius: 12px;
+    --radius-lg: 16px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+/* Header styling */
+.header {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: white;
+}
+.header h1 {
+    font-size: clamp(2rem, 4vw, 2.5rem);
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.header p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    font-weight: 500;
+}
+
+/* Grid for the cards */
+.profile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.profile-card {
+    background: var(--bg-primary);
+    padding: 1.5rem 2rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-medium);
+    border: 1px solid var(--border-color);
+}
+
+.profile-card h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Specific card for larger content */
+.large-card {
+    grid-column: span 2; /* Make this card wider */
+}
+
+/* Progress Bar styling to match leaderboard */
+.progress-container {
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    overflow: hidden;
+    height: 8px;
+    margin: 0.5rem 0 1rem 0;
+}
+.progress-bar {
+    height: 100%;
+    border-radius: 8px;
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
+}
+#progressDetails p {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+/* Badge styling */
+.badge {
+    display: inline-block;
+    background: var(--accent-color);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: var(--radius);
+    margin: 4px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+.badge.weak {
+    background: var(--danger-color);
+}
+
+/* Button styling */
+.back-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    padding: 0.75rem 1.5rem;
+    margin-bottom: 2rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+.back-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Link and suggestion styling */
+#profileDetails a, #personalSuggestions a {
+    color: var(--primary-color);
+    font-weight: 600;
+    text-decoration: none;
+}
+#profileDetails a:hover, #personalSuggestions a:hover {
+    text-decoration: underline;
+}
+
+#personalSuggestions ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+#personalSuggestions li {
+    background: var(--bg-secondary);
+    padding: 0.75rem;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.attendance-warning p {
+    background: var(--danger-color);
+    color: white;
+    padding: 1rem;
+    border-radius: var(--radius);
+    text-align: center;
+    margin-bottom: 2rem;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .large-card {
+        grid-column: span 1; /* Stack cards on mobile */
+    }
+    .container {
+        padding: 1rem;
+    }
+}
