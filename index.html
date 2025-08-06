@@ -495,43 +495,36 @@
             </div>
         </div>
     </div>
-
     <script>
         let students = [];
         let filteredStudents = [];
+        // ⬇️ PASTE YOUR GOOGLE SHEET CSV URL HERE ⬇️
+        const googleSheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQzFJD8ddsNeP1TKh6nlboo2yp2oMi_CDcc1MegYEM6RvM9VZiEzS73tXhV62btKfiKAonL-FF3YxsC/pub?gid=0&single=true&output=csv";
+    
+        // Helper function to convert string numbers from CSV to actual numbers
+        function processStudentData(student) {
+            student.spoken_english_rating = parseInt(student.spoken_english_rating) || 0;
+            student.written_communication_rating = parseInt(student.written_communication_rating) || 0;
+            student.problem_solving_rating = parseInt(student.problem_solving_rating) || 0;
+            // This now expects a whole number like 90 instead of 0.9
+            student.attendance_percentage = parseFloat(student.attendance_percentage) || 0;
+            student.readiness = calculateReadiness(student);
+            return student;
+        }
     
         function calculateReadiness(student) {
-            const weights = {
-                communication: 15,
-                problemSolving: 15,
-                technicalSkills: 15,
-                attendance: 15,
-                resume: 15,
-                portfolio: 15,
-                proactive: 10,
-            };
-    
+            const weights = { communication: 15, problemSolving: 15, technicalSkills: 15, attendance: 15, resume: 15, portfolio: 15, proactive: 10 };
             const communication = ((student.spoken_english_rating + student.written_communication_rating) / 2) * 20;
             const problemSolving = student.problem_solving_rating * 20;
             const technicalSkills = student.familiar_tools ? 70 : 40;
-            const attendance = parseFloat(student.attendance_percentage) * 100;
+            // CHANGED: No longer multiplying by 100. We assume attendance is already a value from 0-100.
+            const attendance = student.attendance_percentage;
             const resumeReadiness = student.has_resume.toLowerCase() === "yes" ? 100 : 0;
             const portfolioReadiness = student.has_online_portfolio.toLowerCase() === "yes" ? 100 : 0;
-    
             let proactive = 0;
             if (student.has_project.toLowerCase() === "yes") proactive += 50;
             if (student.has_certification.toLowerCase() === "yes") proactive += 50;
-    
-            const readiness = (
-                communication * weights.communication +
-                problemSolving * weights.problemSolving +
-                technicalSkills * weights.technicalSkills +
-                attendance * weights.attendance +
-                resumeReadiness * weights.resume +
-                portfolioReadiness * weights.portfolio +
-                proactive * weights.proactive
-            ) / 100;
-    
+            const readiness = (communication * weights.communication + problemSolving * weights.problemSolving + technicalSkills * weights.technicalSkills + attendance * weights.attendance + resumeReadiness * weights.resume + portfolioReadiness * weights.portfolio + proactive * weights.proactive) / 100;
             return Math.round(readiness);
         }
     
@@ -551,58 +544,41 @@
         function populateTable() {
             const tbody = document.getElementById('studentTableBody');
             tbody.innerHTML = '';
-    
             if (filteredStudents.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="3" class="empty-state">
-                            <i class="fas fa-search"></i>
-                            <p>No students found matching your search</p>
-                        </td>
-                    </tr>
-                `;
+                tbody.innerHTML = `<tr><td colspan="3" class="empty-state"><i class="fas fa-search"></i><p>No students found</p></td></tr>`;
                 return;
             }
-    
             filteredStudents.forEach((student, index) => {
                 const rank = index + 1;
-                const attendance = parseFloat(student.attendance_percentage);
                 const readinessClass = getReadinessClass(student.readiness);
                 const rankClass = getRankClass(rank);
-    
                 const row = document.createElement('tr');
                 row.className = 'student-row';
                 row.onclick = () => openProfile(student.registration_number);
-    
                 row.innerHTML = `
-                    <td data-label="Rank">
-                        <div class="rank-badge ${rankClass}">${rank}</div>
-                    </td>
+                    <td data-label="Rank"><div class="rank-badge ${rankClass}">${rank}</div></td>
                     <td data-label="Student">
                         <div class="student-name">${student.name}</div>
                         <div class="student-id">#${student.registration_number}</div>
                     </td>
                     <td data-label="Readiness">
                         <div class="readiness-container">
-                            <div class="readiness-bar">
-                                <div class="readiness-progress readiness-${readinessClass}" style="width: ${student.readiness}%"></div>
-                            </div>
+                            <div class="readiness-bar"><div class="readiness-progress readiness-${readinessClass}" style="width: ${student.readiness}%"></div></div>
                             <div class="readiness-text readiness-${readinessClass}-text">${student.readiness}%</div>
-                            ${attendance < 0.7 ? '<div class="attendance-warning"><i class="fas fa-exclamation-triangle"></i> Ineligible for Placement</div>' : ''}
+                            ${student.attendance_percentage < 70 ? '<div class="attendance-warning"><i class="fas fa-exclamation-triangle"></i> Ineligible for Placement</div>' : ''}
                         </div>
                     </td>
                 `;
-    
                 tbody.appendChild(row);
             });
         }
     
         function updateStats() {
             const totalStudents = students.length;
-            const avgReadiness = Math.round(students.reduce((sum, s) => sum + s.readiness, 0) / totalStudents);
-            const eligibleStudents = students.filter(s => s.attendance_percentage >= 0.7).length;
-            const lowAttendance = students.filter(s => s.attendance_percentage < 0.7).length;
-    
+            const avgReadiness = totalStudents > 0 ? Math.round(students.reduce((sum, s) => sum + s.readiness, 0) / totalStudents) : 0;
+            // CHANGED: Condition is now >= 70 instead of >= 0.7
+            const eligibleStudents = students.filter(s => s.attendance_percentage >= 70).length;
+            const lowAttendance = totalStudents - eligibleStudents;
             document.getElementById('totalStudents').textContent = totalStudents;
             document.getElementById('avgReadiness').textContent = avgReadiness + '%';
             document.getElementById('eligibleStudents').textContent = eligibleStudents;
@@ -613,9 +589,10 @@
             if (!searchTerm) {
                 filteredStudents = students;
             } else {
+                const lowerCaseSearchTerm = searchTerm.toLowerCase();
                 filteredStudents = students.filter(student =>
-                    student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    student.registration_number.toString().includes(searchTerm)
+                    student.name.toLowerCase().includes(lowerCaseSearchTerm) ||
+                    student.registration_number.toString().includes(lowerCaseSearchTerm)
                 );
             }
             populateTable();
@@ -626,32 +603,29 @@
         }
     
         function initializeApp() {
-            fetch('students.json')
-                .then(response => response.json())
-                .then(data => {
-                    students = data;
-    
-                    students.forEach(student => {
-                        student.readiness = calculateReadiness(student);
-                    });
-    
+            Papa.parse(googleSheetURL, {
+                download: true,
+                header: true,
+                complete: (results) => {
+                    students = results.data.map(processStudentData);
                     students.sort((a, b) => b.readiness - a.readiness);
                     filteredStudents = students;
-    
                     updateStats();
                     populateTable();
-    
                     const searchInput = document.getElementById('searchInput');
-                    searchInput.addEventListener('input', (e) => {
-                        filterStudents(e.target.value);
-                    });
-                })
-                .catch(error => {
-                    console.error("Error loading student data:", error);
-                });
+                    searchInput.addEventListener('input', (e) => filterStudents(e.target.value));
+                },
+                error: (error) => {
+                    console.error("Error fetching or parsing student data:", error);
+                    const tbody = document.getElementById('studentTableBody');
+                    tbody.innerHTML = `<tr><td colspan="3" class="empty-state"><i class="fas fa-exclamation-circle"></i><p>Could not load student data.</p></td></tr>`;
+                }
+            });
         }
     
         document.addEventListener('DOMContentLoaded', initializeApp);
     </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 </body>
 </html>

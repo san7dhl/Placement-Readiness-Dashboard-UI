@@ -1,19 +1,38 @@
 document.addEventListener("DOMContentLoaded", () => {
   const urlParams = new URLSearchParams(window.location.search);
   const studentId = urlParams.get("studentId");
+  // ⬇️ PASTE YOUR GOOGLE SHEET CSV URL HERE (AGAIN) ⬇️
+  const googleSheetURL =
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vQzFJD8ddsNeP1TKh6nlboo2yp2oMi_CDcc1MegYEM6RvM9VZiEzS73tXhV62btKfiKAonL-FF3YxsC/pub?gid=0&single=true&output=csv";
 
-  fetch("students.json")
-    .then((res) => res.json())
-    .then((data) => {
-      const student = data.find((s) => s.registration_number == studentId);
+  // Helper function to convert string numbers from CSV to actual numbers
+  function processStudentData(student) {
+    student.spoken_english_rating =
+      parseInt(student.spoken_english_rating) || 0;
+    student.written_communication_rating =
+      parseInt(student.written_communication_rating) || 0;
+    student.problem_solving_rating =
+      parseInt(student.problem_solving_rating) || 0;
+    student.attendance_percentage =
+      parseFloat(student.attendance_percentage) || 0;
+    return student;
+  }
+
+  Papa.parse(googleSheetURL, {
+    download: true,
+    header: true,
+    complete: (results) => {
+      const students = results.data.map(processStudentData);
+      const student = students.find((s) => s.registration_number == studentId);
       if (!student) {
         alert("Student not found.");
         return;
       }
       student.readiness = calculateReadiness(student);
       loadProfile(student);
-    })
-    .catch((err) => console.error("Error loading student data:", err));
+    },
+    error: (err) => console.error("Error loading student data:", err),
+  });
 });
 
 function calculateReadiness(student) {
@@ -26,22 +45,19 @@ function calculateReadiness(student) {
     portfolio: 15,
     proactive: 10,
   };
-
   const communication =
     ((student.spoken_english_rating + student.written_communication_rating) /
       2) *
     20;
   const problemSolving = student.problem_solving_rating * 20;
   const technicalSkills = student.familiar_tools ? 70 : 40;
-  const attendance = parseFloat(student.attendance_percentage) * 100;
+  const attendance = student.attendance_percentage;
   const resumeReadiness = student.has_resume.toLowerCase() === "yes" ? 100 : 0;
   const portfolioReadiness =
     student.has_online_portfolio.toLowerCase() === "yes" ? 100 : 0;
-
   let proactive = 0;
   if (student.has_project.toLowerCase() === "yes") proactive += 50;
   if (student.has_certification.toLowerCase() === "yes") proactive += 50;
-
   const readiness =
     (communication * weights.communication +
       problemSolving * weights.problemSolving +
@@ -51,7 +67,6 @@ function calculateReadiness(student) {
       portfolioReadiness * weights.portfolio +
       proactive * weights.proactive) /
     100;
-
   return Math.round(readiness);
 }
 
@@ -63,8 +78,6 @@ function loadProfile(student) {
     warning: "#f59e0b",
     danger: "#ef4444",
   };
-
-  // 1. Readiness Gauge Chart
   Plotly.newPlot(
     "readinessGauge",
     [
@@ -100,15 +113,13 @@ function loadProfile(student) {
       paper_bgcolor: "rgba(0,0,0,0)",
     }
   );
-
-  // 2. Skill Radar Chart
   const skillValues = [
     ((student.spoken_english_rating + student.written_communication_rating) /
       2) *
       20,
     student.problem_solving_rating * 20,
     student.familiar_tools ? 70 : 40,
-    parseFloat(student.attendance_percentage) * 100,
+    student.attendance_percentage,
     student.has_resume.toLowerCase() === "yes" ? 100 : 0,
     student.has_online_portfolio.toLowerCase() === "yes" ? 100 : 0,
     (student.has_project.toLowerCase() === "yes" ? 50 : 0) +
@@ -123,7 +134,6 @@ function loadProfile(student) {
     "Portfolio",
     "Proactivity",
   ];
-
   Plotly.newPlot(
     "skillRadar",
     [
@@ -137,9 +147,7 @@ function loadProfile(student) {
       },
     ],
     {
-      polar: {
-        radialaxis: { visible: true, range: [0, 100] },
-      },
+      polar: { radialaxis: { visible: true, range: [0, 100] } },
       showlegend: false,
       paper_bgcolor: "rgba(0,0,0,0)",
       width: 300,
@@ -147,8 +155,6 @@ function loadProfile(student) {
       margin: { t: 40, b: 40, l: 40, r: 40 },
     }
   );
-
-  // 3. Badges for Strengths and Weaknesses
   const badgeDiv = document.getElementById("badges");
   badgeDiv.innerHTML = "<h4>Strengths</h4>";
   skillLabels.forEach((label, i) => {
@@ -160,32 +166,24 @@ function loadProfile(student) {
     if (skillValues[i] < 50)
       badgeDiv.innerHTML += `<span class='badge weak'>${label}</span>`;
   });
-
-  // 4. Detailed Progress Bars
   const progressDiv = document.getElementById("progressDetails");
   progressDiv.innerHTML = "";
   skillValues.forEach((val, i) => {
     progressDiv.innerHTML += `<p>${skillLabels[i]} <span>${Math.round(
       val
-    )}%</span></p>
-      <div class='progress-container'><div class='progress-bar' style='width:${val}%;'></div></div>`;
+    )}%</span></p><div class='progress-container'><div class='progress-bar' style='width:${val}%;'></div></div>`;
   });
-
-  // 5. Profile Assets
-  document.getElementById("profileDetails").innerHTML = `
-      <p><strong>Resume:</strong> ${
-        student.has_resume.toLowerCase() === "yes"
-          ? `<a href="${student.resume_link}" target="_blank">View Resume <i class="fas fa-external-link-alt"></i></a>`
-          : "Not Uploaded"
-      }</p>
-      <p><strong>Portfolio:</strong> ${
-        student.has_online_portfolio.toLowerCase() === "yes"
-          ? `<a href="${student.portfolio_link}" target="_blank">View Portfolio <i class="fas fa-external-link-alt"></i></a>`
-          : "Not Uploaded"
-      }</p>
-  `;
-
-  // 6. Actionable Suggestions
+  document.getElementById(
+    "profileDetails"
+  ).innerHTML = `<p><strong>Resume:</strong> ${
+    student.has_resume.toLowerCase() === "yes"
+      ? `<a href="${student.resume_link}" target="_blank">View Resume <i class="fas fa-external-link-alt"></i></a>`
+      : "Not Uploaded"
+  }</p><p><strong>Portfolio:</strong> ${
+    student.has_online_portfolio.toLowerCase() === "yes"
+      ? `<a href="${student.portfolio_link}" target="_blank">View Portfolio <i class="fas fa-external-link-alt"></i></a>`
+      : "Not Uploaded"
+  }</p>`;
   const suggestionDiv = document.getElementById("personalSuggestions");
   const suggestions = [];
   if (skillValues[0] < 75)
@@ -210,15 +208,11 @@ function loadProfile(student) {
     suggestions.length > 0
       ? `<ul>${suggestions.map((s) => `<li>${s}</li>`).join("")}</ul>`
       : "<p>Great work! Keep up the momentum.</p>";
-
-  // 7. Attendance Warning
-  if (parseFloat(student.attendance_percentage) < 0.7) {
+  if (student.attendance_percentage < 70) {
     document.getElementById(
       "attendanceWarning"
     ).innerHTML = `<p><i class="fas fa-exclamation-triangle"></i> With this attendance level, you are not eligible for placements.</p>`;
   }
-
-  // 8. Back Button
   const backBtn = document.createElement("button");
   backBtn.innerHTML = `<i class="fas fa-arrow-left"></i> Back to Leaderboard`;
   backBtn.className = "back-btn";
